@@ -1,0 +1,37 @@
+<bootstrapper>
+	<end-point-list>
+		<end-point>
+			<name>get pizza meta-data</name>
+			<url>/pizza_meta_data/</url>
+			<method>GET</method>
+			<desc>Retrieve pizza metadata.</desc>
+			<type>Oracle</type>
+			<sql><![CDATA[
+				select * from pizza
+				]]>					
+			</sql>
+		</end-point>
+		<end-point>
+			<name>Get toppings details by identifier</name>
+			<url>/toppings_details/[:id]</url>
+			<method>GET</method>
+			<desc>Retrieve toppings details by identifier.</desc>
+			<type>Oracle</type>
+			<sql><![CDATA[
+				select * from toppings where id = [:id]
+				]]>					
+			</sql>
+		</end-point>
+		<end-point>
+			<name>Get cheeses by identifier</name>
+			<url>/cheese_details/[:id]</url>
+			<method>GET</method>
+			<desc>Retrieve common demographic data for given BDM study code, e.g., bdm_study_code = CP1013.</desc>
+			<type>Oracle</type>
+			<sql><![CDATA[
+				select * from cheeses where id = [:id]
+				]]>					
+			</sql>
+		</end-point>
+	</end-point-list>
+</bootstrapper>
