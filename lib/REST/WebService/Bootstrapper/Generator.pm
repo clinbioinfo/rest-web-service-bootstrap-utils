@@ -99,6 +99,22 @@ has 'namespace' => (
     required => FALSE
     );
 
+has 'author' => (
+    is       => 'rw',
+    isa      => 'Str',
+    writer   => 'setAuthor',
+    reader   => 'getAuthor',
+    required => FALSE
+    );
+
+has 'copyright' => (
+    is       => 'rw',
+    isa      => 'Str',
+    writer   => 'setCopyright',
+    reader   => 'getCopyright',
+    required => FALSE
+    );
+
 sub getInstance {
 
     if (!defined($instance)){
@@ -166,6 +182,16 @@ sub _generate_modules {
         $self->{_logger}->logconfess("namespace was not defined");
     }
 
+    my $author = $self->getAuthor();
+    if (!defined($author)){
+        $self->{_logger}->logconfess("author was not defined");
+    }
+
+    my $copyright = $self->getCopyright();
+    if (!defined($copyright)){
+        $self->{_logger}->logconfess("copyright was not defined");
+    }
+
     my $outdir = $self->getOutdir();
     if (!defined($outdir)){
         $self->{_logger}->logconfess("outdir was not defined");
@@ -211,7 +237,10 @@ sub _generate_modules {
             }
 
             my $final_lookup = {
-                namespace => $full_namespace,
+                author    => $author,
+                copyright => $copyright,
+                namespace => $namespace,
+                full_namespace => $full_namespace
             };
             
             my $tt = new Template({ABSOLUTE => 1});

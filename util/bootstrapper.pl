@@ -34,6 +34,10 @@ use constant DEFAULT_USERNAME =>  getlogin || getpwuid($<) || $ENV{USER} || "sun
 
 use constant DEFAULT_OUTDIR => '/tmp/' . DEFAULT_USERNAME . '/' . File::Basename::basename($0) . '/' . time();
 
+use constant DEFAULT_AUTHOR => 'Jaideep Sundaram';
+
+use constant DEFAULT_COPYRIGHT => 'Copyright Jaideep Sundaram';
+
 use REST::WebService::Bootstrapper::Logger;
 use REST::WebService::Bootstrapper::Config::Manager;
 use REST::WebService::Bootstrapper::Manager;
@@ -52,7 +56,9 @@ my (
     $verbose,
     $admin_email_address,
     $test_mode,
-    $namespace
+    $namespace,
+    $author,
+    $copyright
     );
 
 my $results = GetOptions (
@@ -66,6 +72,8 @@ my $results = GetOptions (
     'admin_email_address=s'          => \$admin_email_address,
     'test_mode=s'                    => \$test_mode,
     'namespace=s'                    => \$namespace,
+    'author=s'                       => \$author,
+    'copyright=s'                    => \$copyright,    
     );
 
 &checkCommandLineArguments();
@@ -88,7 +96,9 @@ my $manager = REST::WebService::Bootstrapper::Manager::getInstance(
     infile    => $infile,
     outdir    => $outdir,
     test_mode => $test_mode,
-    namespace => $namespace
+    namespace => $namespace,
+    author    => $author,
+    copyright => $copyright
     );
 
 if (!defined($manager)){
@@ -158,6 +168,20 @@ sub checkCommandLineArguments {
         $admin_email_address = DEFAULT_ADMIN_EMAIL_ADDRESS;
 
         printYellow("--admin-email-address was not specified and therefore was set to '$admin_email_address'");
+    }
+
+    if (!defined($author)){
+
+        $author = DEFAULT_AUTHOR;
+
+        printYellow("--author was not specified and therefore was set to '$author'");
+    }
+
+    if (!defined($copyright)){
+
+        $copyright = DEFAULT_COPYRIGHT;
+
+        printYellow("--copyright was not specified and therefore was set to '$copyright'");
     }
 
     if (!defined($outdir)){

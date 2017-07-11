@@ -94,6 +94,22 @@ has 'namespace' => (
     required => FALSE
     );
 
+has 'author' => (
+    is       => 'rw',
+    isa      => 'Str',
+    writer   => 'setAuthor',
+    reader   => 'getAuthor',
+    required => FALSE
+    );
+
+has 'copyright' => (
+    is       => 'rw',
+    isa      => 'Str',
+    writer   => 'setCopyright',
+    reader   => 'getCopyright',
+    required => FALSE
+    );
+
 sub getInstance {
 
     if (!defined($instance)){
