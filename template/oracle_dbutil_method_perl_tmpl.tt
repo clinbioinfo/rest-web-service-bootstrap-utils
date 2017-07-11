@@ -1,0 +1,11 @@
+sub [% method_name %]{
+
+	my $self = shift;
+	## [% desc %]
+
+	my $sql = qq|
+	    [% sql %]
+	|;	
+
+    return $self->_get_array_ref($sql);
+}

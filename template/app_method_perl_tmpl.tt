@@ -1,0 +1,4 @@
+get '[% url %]' => sub {
+
+    return $manager->[% method_name %]();
+};

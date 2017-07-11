@@ -1,0 +1,8 @@
+sub [% method_name %]{
+
+	my $self = shift;
+
+	## [% desc %]
+	
+    return $self->{_dbutil}->[% method_name %](@_);
+};
