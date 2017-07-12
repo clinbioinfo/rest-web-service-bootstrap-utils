@@ -26,6 +26,10 @@ use constant DEFAULT_OUTDIR => '/tmp/' . DEFAULT_USERNAME . '/' . File::Basename
 
 use constant DEFAULT_APP_METHOD_TEMPLATE_FILE => "$FindBin::Bin/../template/app_method_perl_tmpl.tt";
 
+use constant DEFAULT_APP_ROUTE_PARAMETER_TEMPLATE_FILE => "$FindBin::Bin/../template/app_route_parameter_tmpl.tt";
+
+use constant DEFAULT_APP_BODY_PARAMETER_TEMPLATE_FILE => "$FindBin::Bin/../template/app_body_parameter_tmpl.tt";
+
 use constant DEFAULT_MANAGER_METHOD_TEMPLATE_FILE => "$FindBin::Bin/../template/manager_method_perl_tmpl.tt";
 
 use constant DEFAULT_SQLITE_DBUTIL_METHOD_TEMPLATE_FILE => "$FindBin::Bin/../template/sqlite_dbutil_method_perl_tmpl.tt";
@@ -139,6 +143,24 @@ has 'app_method_template_file' => (
     reader   => 'getAppMethodTemplateFile',
     required => FALSE,
     default  => DEFAULT_APP_METHOD_TEMPLATE_FILE
+    );
+
+has 'app_route_parameter_template_file' => (
+    is       => 'rw',
+    isa      => 'Str',
+    writer   => 'setAppRouteParameterTemplateFile',
+    reader   => 'getAppRouteParameterTemplateFile',
+    required => FALSE,
+    default  => DEFAULT_APP_ROUTE_PARAMETER_TEMPLATE_FILE
+    );
+
+has 'app_body_parameter_template_file' => (
+    is       => 'rw',
+    isa      => 'Str',
+    writer   => 'setAppBodyParameterTemplateFile',
+    reader   => 'getAppBodyParameterTemplateFile',
+    required => FALSE,
+    default  => DEFAULT_APP_BODY_PARAMETER_TEMPLATE_FILE
     );
 
 has 'manager_method_template_file' => (
@@ -304,13 +326,18 @@ sub _generate_methods {
             $self->{_logger}->logconfess("sql was not defined for Record : " . Dumper $sql);
         }
 
-        $self->_get_app_method_content($method_name, $url, $desc);
+
+        my $route_parameters_list = $record->getRouteParametersList();
+
+        my $body_parameters_list = $record->getBodyParametersList();
+
+        $self->_get_app_method_content($method_name, $url, $desc, $route_parameters_list, $body_parameters_list);
 
         $self->_get_manager_method_content($method_name, $url, $desc, $type);
 
         $self->_set_dbutil_type($type);
 
-        $self->_get_dbutil_method_content($method_name, $url, $sql, $desc, $type);
+        $self->_get_dbutil_method_content($method_name, $url, $sql, $desc, $type, $route_parameters_list, $body_parameters_list);
     }
 }
 
@@ -335,23 +362,113 @@ sub _set_dbutil_type {
 sub _get_app_method_content {
 
     my $self = shift;
-    my ($method_name, $url, $desc) = @_;
+    my ($method_name, $url, $desc, $route_parameters_list, $body_parameters_list) = @_;
     
     my $template_file = $self->getAppMethodTemplateFile();
     if (!defined($template_file)){
         $self->{_logger}->logconfess("template_file was not defined");
     }
 
+    my $route_parameters_list_content = $self->_get_route_parameters_list_content($route_parameters_list);
+
+    my $body_parameters_list_content = $self->_get_body_parameters_list_content($body_parameters_list);
+
+    my $argument_list_content = $self->_get_argument_list_content($route_parameters_list, $body_parameters_list);
+
     my $lookup = {
         url => $url,
         desc => $desc,
-        method_name => $method_name
+        method_name => $method_name,
+        route_parameters_list_content => $route_parameters_list_content,
+        body_parameters_list_content => $body_parameters_list_content,
+        argument_list_content => $argument_list_content
     };
 
     my $content = $self->_generate_content_from_template($template_file, $lookup);
 
     push(@{$self->{_app_method_content_list}}, $content);
 }
+
+sub _get_route_parameters_list_content {
+
+    my $self = shift;
+    my ($route_parameters_list) = @_;
+
+    my $content_list = [];
+
+    foreach my $param (@{$route_parameters_list}){
+
+        my $template_file = $self->getAppRouteParameterTemplateFile();
+        if (!defined($template_file)){
+            $self->{_logger}->logconfess("template_file was not defined");
+        }
+
+        my $lookup = { param => $param};
+
+        my $content = $self->_generate_content_from_template($template_file, $lookup);
+
+        push(@{$content_list}, $content);
+    }
+
+    my $content = join("\n\n", @{$content_list});
+
+    return $content;
+}
+
+sub _get_body_parameters_list_content {
+
+    my $self = shift;
+    my ($body_parameters_list) = @_;
+
+    my $content_list = [];
+
+    foreach my $param (@{$body_parameters_list}){
+
+        my $template_file = $self->getAppBodyParameterTemplateFile();
+        if (!defined($template_file)){
+            $self->{_logger}->logconfess("template_file was not defined");
+        }
+
+        my $lookup = { param => $param};
+
+        my $content = $self->_generate_content_from_template($template_file, $lookup);
+
+        push(@{$content_list}, $content);
+    }
+
+    my $content = join("\n\n", @{$content_list});
+    
+    return $content;
+}
+
+sub _get_argument_list_content {
+
+    my $self = shift;
+    my ($route_parameters_list, $body_parameters_list) = @_;
+
+    my $content_list = [];
+
+    foreach my $param (@{$route_parameters_list}){
+
+        my $param_variable_name = '$' . $param;
+
+        push(@{$content_list}, $param_variable_name);
+    }
+
+    foreach my $param (@{$body_parameters_list}){
+
+        my $param_variable_name = '$' . $param;
+
+        push(@{$content_list}, $param_variable_name);
+    }
+
+    my $content = join(', ', @{$content_list});
+
+    print "content '$content'\n";
+
+    return $content;
+}
+
 
 sub _get_manager_method_content {
 

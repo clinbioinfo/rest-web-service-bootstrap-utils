@@ -1,4 +1,8 @@
 get '[% url %]' => sub {
 
-    return $manager->[% method_name %]();
+	[% routes_parameters_list_content %]
+
+	[% body_parameters_list_content %]
+
+    return $manager->[% method_name %]([% argument_list_content %]);
 };

@@ -1,0 +1,4 @@
+my $[% param %] = route_parameters->get('[% param %]');
+if (!defined($[% param %])){
+	confess("route parameter '[% param %]' was not defined");
+}

@@ -138,7 +138,67 @@ sub _end_point_callback {
         }
     }
 
-    $self->_create_endpoint_record($name, $url, $desc, $method, $type, $sql);
+    my $route_parameters_list = $self->_get_route_parameters_list($url, $name);
+
+    my $body_parameters_list = [];
+
+    if ($end_point->has_child('body-parameters-list')){
+
+        my $body_parameters_list_elem = $end_point->first_child('body-parameters-list');
+
+        if ($body_parameters_list_elem->has_child('body-param')){
+            
+            my $body_param = $body_parameters_list_elem->first_child('body-param');
+            
+            my $body_param_text = $body_param->text();
+
+            if ((defined($body_param_text)) && ($body_param_text ne '')){
+                
+                push(@{$body_parameters_list}, $body_param_text);
+            }
+
+            while ($body_param = $body_param->next_sibling()){
+
+                my $body_param_text = $body_param->text();
+                
+                if ((defined($body_param_text)) && ($body_param_text ne '')){
+                
+                    push(@{$body_parameters_list}, $body_param_text);
+                }
+            }
+        }
+        else {
+            $self->{_logger}->info("body-parameters-list does not have a body-param for end-point " . Dumper $end_point);            
+        }
+    }
+    else {
+        $self->{_logger}->info("end-point with name '$name' does not have any body-parameters-list element");
+    }
+
+    $self->_create_endpoint_record($name, $url, $desc, $method, $type, $sql, $route_parameters_list, $body_parameters_list);
+}
+
+sub _get_route_parameters_list {
+
+    my $self = shift;
+    my ($url, $name) = @_;
+
+    my @parts = split(/\//, $url);
+
+    my $list = [];
+    my $ctr = 0;
+
+    foreach my $part (@parts){
+    
+        if ($part =~ m|\:(\S+)|){
+            push(@{$list}, $1);
+            $ctr++;
+        }
+    }
+
+    $self->{_logger}->info("Found '$ctr' route parameters for end-point with name '$name'");
+
+    return $list;
 }
 
 no Moose;

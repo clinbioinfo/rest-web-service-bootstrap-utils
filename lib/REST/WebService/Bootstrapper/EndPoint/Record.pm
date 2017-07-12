@@ -54,6 +54,22 @@ has 'sql' => (
     required => FALSE
     );
 
+has 'route_parameters_list' => (
+    is       => 'rw',
+    isa      => 'ArrayRef',
+    writer   => 'setRouteParametersList',
+    reader   => 'getRouteParametersList',
+    required => FALSE
+    );
+
+has 'body_parameters_list' => (
+    is       => 'rw',
+    isa      => 'ArrayRef',
+    writer   => 'setBodyParametersList',
+    reader   => 'getBodyParametersList',
+    required => FALSE
+    );
+
 sub BUILD {
 
     my $self = shift;

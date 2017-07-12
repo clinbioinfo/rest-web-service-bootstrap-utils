@@ -1,0 +1,4 @@
+my $[% param %] = body_parameters->get('[% param %]');
+if (!defined($[% param %])){
+	confess("body parameter '[% param %]' was not defined");
+}

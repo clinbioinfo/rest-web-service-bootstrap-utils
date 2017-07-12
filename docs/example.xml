@@ -6,6 +6,10 @@
 			<method>GET</method>
 			<desc>Retrieve pizza metadata.</desc>
 			<type>Oracle</type>
+			<body-parameters-list>
+				<body-param>username</body-param>
+				<body-param>password</body-param>
+			</body-parameters-list>
 			<sql><![CDATA[
 				select * from pizza
 				]]>					
@@ -13,23 +17,31 @@
 		</end-point>
 		<end-point>
 			<name>Get toppings details by identifier</name>
-			<url>/toppings_details/[:id]</url>
+			<url>/toppings_details/:id</url>
 			<method>GET</method>
 			<desc>Retrieve toppings details by identifier.</desc>
 			<type>Oracle</type>
+			<body-parameters-list>
+				<body-param>username</body-param>
+				<body-param>password</body-param>
+			</body-parameters-list>
 			<sql><![CDATA[
-				select * from toppings where id = [:id]
+				select * from toppings where id = :id
 				]]>					
 			</sql>
 		</end-point>
 		<end-point>
 			<name>Get cheeses by identifier</name>
-			<url>/cheese_details/[:id]</url>
+			<url>/cheese_details/:id</url>
 			<method>GET</method>
 			<desc>Retrieve common demographic data for given BDM study code, e.g., bdm_study_code = CP1013.</desc>
 			<type>Oracle</type>
+			<body-parameters-list>
+				<body-param>username</body-param>
+				<body-param>password</body-param>
+			</body-parameters-list>
 			<sql><![CDATA[
-				select * from cheeses where id = [:id]
+				select * from cheeses where id = :id
 				]]>					
 			</sql>
 		</end-point>
