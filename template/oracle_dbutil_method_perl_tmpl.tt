@@ -1,6 +1,8 @@
 sub [% method_name %]{
 
 	my $self = shift;
+	[% argument_list_content %]
+	
 	## [% desc %]
 
 	my $sql = qq|

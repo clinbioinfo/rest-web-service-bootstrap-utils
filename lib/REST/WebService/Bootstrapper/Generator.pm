@@ -30,6 +30,8 @@ use constant DEFAULT_APP_ROUTE_PARAMETER_TEMPLATE_FILE => "$FindBin::Bin/../temp
 
 use constant DEFAULT_APP_BODY_PARAMETER_TEMPLATE_FILE => "$FindBin::Bin/../template/app_body_parameter_tmpl.tt";
 
+use constant DEFAULT_DBUTIL_ARGUMENT_TEMPLATE_FILE => "$FindBin::Bin/../template/dbutil_argument_tmpl.tt";
+
 use constant DEFAULT_MANAGER_METHOD_TEMPLATE_FILE => "$FindBin::Bin/../template/manager_method_perl_tmpl.tt";
 
 use constant DEFAULT_SQLITE_DBUTIL_METHOD_TEMPLATE_FILE => "$FindBin::Bin/../template/sqlite_dbutil_method_perl_tmpl.tt";
@@ -224,6 +226,16 @@ has 'dbutil_type' => (
     reader   => 'getDBUtilType',
     required => FALSE
     );
+
+has 'dbutil_argument_template_file' => (
+    is       => 'rw',
+    isa      => 'Str',
+    writer   => 'setDBUtilArgumentTemplateFile',
+    reader   => 'getDBUtilArgumentTemplateFile',
+    required => FALSE,
+    default  => DEFAULT_DBUTIL_ARGUMENT_TEMPLATE_FILE
+    );
+
 
 sub getInstance {
 
@@ -462,6 +474,8 @@ sub _get_argument_list_content {
         push(@{$content_list}, $param_variable_name);
     }
 
+    $self->{_current_argument_list} = $content_list;
+
     my $content = join(', ', @{$content_list});
 
     print "content '$content'\n";
@@ -527,7 +541,7 @@ sub _get_dbutil_method_content {
         desc => $desc,
         sql  => $sql,
         method_name => $method_name,
-
+        argument_list_content => $self->_get_dbutil_argument_list_content()
     };
 
     my $content = $self->_generate_content_from_template($template_file, $lookup);
@@ -550,6 +564,33 @@ sub _get_dbutil_method_content {
     else {
         $self->{_logger}->logconfess("type '$type' is not supported");
     }
+}
+
+sub _get_dbutil_argument_list_content {
+
+    my $self = shift;
+
+    my $content_list = [];
+
+    foreach my $param (@{$self->{_current_argument_list}}){
+
+        my $template_file = $self->getDBUtilArgumentTemplateFile();
+        if (!defined($template_file)){
+            $self->{_logger}->logconfess("template_file was not defined");
+        }
+
+        my $lookup = { param => $param};
+
+        my $content = $self->_generate_content_from_template($template_file, $lookup);
+
+        push(@{$content_list}, $content);
+    }
+
+    my $argument_list_content = 'my (' . join(', ', @{$self->{_current_argument_list}}) . ') = @_;';
+
+    my $content = $argument_list_content . "\n\n" . join("\n\n", @{$content_list});
+
+    return $content;
 }
 
 sub _generate_content_from_template {

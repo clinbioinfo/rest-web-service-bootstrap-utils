@@ -1,0 +1,3 @@
+if (!defined([% param %])){
+	$self->{_logger}->logconfess("[% param %] was not defined");
+}
