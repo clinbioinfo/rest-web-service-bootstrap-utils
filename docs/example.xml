@@ -11,7 +11,8 @@
 				<body-param>password</body-param>
 			</body-parameters-list>
 			<sql><![CDATA[
-				select * from pizza
+				select * 
+				from pizza
 				]]>					
 			</sql>
 		</end-point>
@@ -26,7 +27,9 @@
 				<body-param>password</body-param>
 			</body-parameters-list>
 			<sql><![CDATA[
-				select * from toppings where id = :id
+				select * 
+				from toppings 
+				where id = :id
 				]]>					
 			</sql>
 		</end-point>
@@ -41,7 +44,10 @@
 				<body-param>password</body-param>
 			</body-parameters-list>
 			<sql><![CDATA[
-				select * from cheeses where id = :id
+				select * 
+				from cheeses 
+				where id = :id
+				and username = :username
 				]]>					
 			</sql>
 		</end-point>

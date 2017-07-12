@@ -460,11 +460,15 @@ sub _get_argument_list_content {
 
     my $content_list = [];
 
+    $self->{_clean_current_argument_list} = [];
+
     foreach my $param (@{$route_parameters_list}){
 
         my $param_variable_name = '$' . $param;
 
         push(@{$content_list}, $param_variable_name);
+
+        push(@{$self->{_clean_current_argument_list}}, $param);
     }
 
     foreach my $param (@{$body_parameters_list}){
@@ -472,6 +476,8 @@ sub _get_argument_list_content {
         my $param_variable_name = '$' . $param;
 
         push(@{$content_list}, $param_variable_name);
+
+        push(@{$self->{_clean_current_argument_list}}, $param);
     }
 
     $self->{_current_argument_list} = $content_list;
@@ -536,12 +542,16 @@ sub _get_dbutil_method_content {
         $self->{_logger}->logconfess("template_file was not defined");
     }
 
+    my $argument_list_content = $self->_get_dbutil_argument_list_content();
+
+    my $adjusted_sql_content = $self->_get_adjusted_sql_content($sql);
+
     my $lookup = {
         url  => $url,
         desc => $desc,
-        sql  => $sql,
+        sql  => $adjusted_sql_content,
         method_name => $method_name,
-        argument_list_content => $self->_get_dbutil_argument_list_content()
+        argument_list_content => $argument_list_content
     };
 
     my $content = $self->_generate_content_from_template($template_file, $lookup);
@@ -565,6 +575,62 @@ sub _get_dbutil_method_content {
         $self->{_logger}->logconfess("type '$type' is not supported");
     }
 }
+
+sub _get_adjusted_sql_content {
+
+    my $self = shift;
+    my ($sql) = @_;
+
+    my $content_list = [];
+
+    my $lookup = {};
+
+    if (exists $self->{_clean_current_argument_list}){
+
+        if (scalar(@{$self->{_clean_current_argument_list}}) > 0){
+
+            foreach my $param (@{$self->{_clean_current_argument_list}}){
+                $lookup->{$param}++;
+            }
+        }
+        else {
+            $self->{_logger}->info("Looks like there is nothing in the _clean_current_argument_list");
+        }
+    }
+    else {
+        $self->{_logger}->logconfess("_clean_current_argument_list does not exist");
+    }
+
+    $self->{_logger}->info(Dumper $lookup);
+
+    my @lines =  split("\n", $sql);
+    
+    my @adjusted_lines;
+
+    foreach my $line (@lines){
+
+        if ($line =~ m|\:(\S+)|){
+        
+            my $param = $1;
+        
+            if (exists $lookup->{$param}){
+        
+                $line =~ s|\:$param|\$$param|g;
+            }
+            else {
+                $self->{_logger}->warn("param '$param' does not exist in the list of known arguments lookup");
+                $line =~ s|\:$param|\$$param|g;
+            }
+        }
+
+        push(@adjusted_lines, $line);
+    }
+
+    my $content = join("\n", @adjusted_lines);
+
+    return $content;
+}
+
 
 sub _get_dbutil_argument_list_content {
 
