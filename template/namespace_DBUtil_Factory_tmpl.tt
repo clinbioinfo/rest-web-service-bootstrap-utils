@@ -3,6 +3,12 @@ package [% namespace %]::DBUtil::Factory;
 use Moose;
 
 use [% namespace %]::Logger;
+use [% namespace %]::Oracle::DBUtil;
+use [% namespace %]::MySQL::DBUtil;
+use [% namespace %]::Postgresql::DBUtil;
+use [% namespace %]::MongoDB::DBUtil;
+use [% namespace %]::SQLite::DBUtil;
+
 
 use constant TRUE  => 1;
 use constant FALSE => 0;
@@ -131,6 +137,44 @@ sub create {
         if (!defined($dbutil)){
             $self->{_logger}->logconfess("dbutil was not defined");
         }
+
+        return $dbutil;
+    }
+    elsif (lc($type) eq 'oracle'){
+
+        my $dbutil = [% namespace %]::Oracle::DBUtil::getInstance(@_);
+        if (!defined($dbutil)){
+            $self->{_logger}->logconfess("dbutil was not defined");
+        }
+
+        return $dbutil;
+    }
+    elsif (lc($type) eq 'postgresql'){
+
+        my $dbutil = [% namespace %]::Postgresql::DBUtil::getInstance(@_);
+        if (!defined($dbutil)){
+            $self->{_logger}->logconfess("dbutil was not defined");
+        }
+
+        return $dbutil;
+    }
+    elsif (lc($type) eq 'sqlite'){
+
+        my $dbutil = [% namespace %]::SQLite::DBUtil::getInstance(@_);
+        if (!defined($dbutil)){
+            $self->{_logger}->logconfess("dbutil was not defined");
+        }
+
+        return $dbutil;
+    }
+    elsif (lc($type) eq 'mysql'){
+
+        my $dbutil = [% namespace %]::MySQL::DBUtil::getInstance(@_);
+        if (!defined($dbutil)){
+            $self->{_logger}->logconfess("dbutil was not defined");
+        }
+
+        return $dbutil;
     }
     else {
         $self->{_logger}->logconfess("Unsupported database type '$type'");
@@ -173,8 +217,3 @@ __END__
 =over 4
 
 =cut
-
-
-
-no Moose;
-__PACKAGE__->meta->make_immutable;

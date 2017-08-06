@@ -190,7 +190,8 @@ sub getDatabaseAdminPassword {
 }
 
 
-1==1; ## End of module
+no Moose;
+__PACKAGE__->meta->make_immutable;
 
 __END__
 

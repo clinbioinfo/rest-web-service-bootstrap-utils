@@ -138,7 +138,29 @@ sub getUrlBase {
     return $self->{_parser}->getUrlBase(@_);
 }
 
-1==1; ## End of module
+sub getUrlBase {
+
+    my $self = shift;
+
+    return $self->{_parser}->getUrlBase(@_);
+}
+
+sub getDatabaseAdminUsername {
+
+    my $self = shift;
+
+    return $self->{_parser}->getDatabaseAdminUsername(@_);
+}
+
+sub getDatabaseAdminPassword{
+
+    my $self = shift;
+
+    return $self->{_parser}->getDatabaseAdminPassword(@_);
+}
+
+no Moose;
+__PACKAGE__->meta->make_immutable;
 
 __END__
 
