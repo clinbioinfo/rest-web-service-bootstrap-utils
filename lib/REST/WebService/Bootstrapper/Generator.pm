@@ -14,6 +14,14 @@ use File::Slurp;
 use constant TRUE  => 1;
 use constant FALSE => 0;
 
+use constant DEFAULT_DATABASE => 'bdmprd2';
+
+use constant DEFAULT_ORACLE_HOME => '/apps/oracle/product/client/11.2.0/';
+
+use constant DEFAULT_DATABASE_ACCOUNT_TYPE => 'publisher';
+
+use constant DEFAULT_APP_CONFIG_INI_FILE   => 'app_config.ini';
+
 use constant DEFAULT_TEST_MODE => TRUE;
 
 use constant DEFAULT_DESCRIPTION => 'N/A';
@@ -44,6 +52,8 @@ use constant DEFAULT_POSTGRESQL_DBUTIL_METHOD_TEMPLATE_FILE => "$FindBin::Bin/..
 
 use constant DEFAULT_MYSQL_METHOD_TEMPLATE_FILE => "$FindBin::Bin/../template/mysql_dbutil_method_perl_tmpl.tt";
 
+use constant DEFAULT_BIN_APP_TEMPLATE_FILE => "$FindBin::Bin/../template/bin_app_psgi_tmpl.tt";
+
 
 my $modulate_template_file_list = [
     'template/namespace_Logger_tmpl.tt',
@@ -62,6 +72,42 @@ my $modulate_template_file_list = [
 
 ## Singleton support
 my $instance;
+
+has 'database' => (
+    is       => 'rw',
+    isa      => 'Str',
+    writer   => 'setDatabase',
+    reader   => 'getDatabase',
+    required => FALSE,
+    default  => DEFAULT_DATABASE
+    );
+
+has 'oracle_home' => (
+    is       => 'rw',
+    isa      => 'Str',
+    writer   => 'setOracleHome',
+    reader   => 'getOracleHome',
+    required => FALSE,
+    default  => DEFAULT_ORACLE_HOME
+    );
+
+has 'database_account_type' => (
+    is       => 'rw',
+    isa      => 'Str',
+    writer   => 'setDatabaseAccountType',
+    reader   => 'getDatabaseAccountType',
+    required => FALSE,
+    default  => DEFAULT_DATABASE_ACCOUNT_TYPE
+    );
+
+has 'app_config_ini_file' => (
+    is       => 'rw',
+    isa      => 'Str',
+    writer   => 'setAppConfigIniFile',
+    reader   => 'getAppConfigIniFile',
+    required => FALSE,
+    default  => DEFAULT_APP_CONFIG_INI_FILE
+    );
 
 has 'test_mode' => (
     is       => 'rw',
@@ -236,6 +282,14 @@ has 'dbutil_argument_template_file' => (
     default  => DEFAULT_DBUTIL_ARGUMENT_TEMPLATE_FILE
     );
 
+has 'bin_app_psgi_template_file' => (
+    is       => 'rw',
+    isa      => 'Str',
+    writer   => 'setBinAppPSGITemplateFile',
+    reader   => 'getBinAppPSGITemplateFile',
+    required => FALSE,
+    default  => DEFAULT_BIN_APP_TEMPLATE_FILE
+    );
 
 sub getInstance {
 
@@ -291,6 +345,8 @@ sub generate {
     $self->_generate_methods($record_list);
 
     $self->_generate_modules();
+
+    $self->_generate_bin_app_psgi();
 }
 
 sub _generate_methods {
@@ -835,6 +891,43 @@ sub _generate_modules {
     $self->{_logger}->info("Processed '$template_file_ctr' template files");
 }
 
+
+sub _generate_bin_app_psgi {
+
+    my $self = shift;
+
+    my $template_file = $self->getBinAppPSGITemplateFile();
+    if (!defined($template_file)){
+        $self->{_logger}->logconfess("template_file was not defined");
+    }    
+
+    $self->_checkTemplateFileStatus($template_file);
+
+    my $tt = new Template({ABSOLUTE => 1});
+    if (!defined($tt)){
+        $self->{_logger}->logconfess("Could not instantiate TT");
+    }
+
+    my $outfile = $self->getOutdir() . '/bin/app.psgi';
+
+    if (-e $outfile){
+        $self->_backup_file($outfile);
+    }
+
+    my $lookup = {
+        namespace             => $self->getNamespace(),
+        database              => $self->getDatabase,
+        oracle_home           => $self->getOracleHome(),
+        database_account_type => $self->getDatabaseAccountType(),        
+        app_config_ini_file   => $self->getAppConfigIniFile()
+    };
+
+    $tt->process($template_file, $lookup, $outfile) || $self->{_logger}->logconfess("Encountered the following Template::process error:" . $tt->error());
+
+    $self->{_logger}->info("Created file '$outfile' using template file '$template_file'");
+
+    print "Wrote '$outfile'\n";
+}
 
 sub _backup_file {
 

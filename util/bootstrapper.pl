@@ -16,6 +16,14 @@ use constant TRUE => 1;
 
 use constant FALSE => 0;
 
+use constant DEFAULT_DATABASE => 'bdmprd2';
+
+use constant DEFAULT_ORACLE_HOME => '/apps/oracle/product/client/11.2.0/';
+
+use constant DEFAULT_DATABASE_ACCOUNT_TYPE => 'publisher';
+
+use constant DEFAULT_APP_CONFIG_INI_FILE   => 'app_config.ini';
+
 use constant DEFAULT_TEST_MODE => TRUE;
 
 use constant DEFAULT_IS_COMMIT_AND_PUSH => TRUE;
@@ -58,7 +66,11 @@ my (
     $test_mode,
     $namespace,
     $author,
-    $copyright
+    $copyright,
+    $database,
+    $database_account_type,
+    $oracle_home,
+    $app_config_ini_file
     );
 
 my $results = GetOptions (
@@ -103,6 +115,21 @@ my $manager = REST::WebService::Bootstrapper::Manager::getInstance(
 
 if (!defined($manager)){
     $logger->logdie("Could not instantiate REST::WebService::Bootstrapper::Manager");
+}
+
+if (defined($database)){
+    $manager->setDatabase($database);
+}
+
+if (defined($database_account_type)){
+    $manager->setDatabaseAccountType($database_account_type);
+}
+
+if (defined($oracle_home)){
+    $manager->setOracleHome($oracle_home);
+}
+if (defined($app_config_ini_file)){
+    $manager->setAppConfigIniFile($app_config_ini_file);
 }
 
 $manager->run();
