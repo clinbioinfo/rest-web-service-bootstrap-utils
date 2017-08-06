@@ -484,7 +484,7 @@ sub _get_argument_list_content {
 
     my $content = join(', ', @{$content_list});
 
-    print "content '$content'\n";
+    $self->{_logger}->info("content '$content'");
 
     return $content;
 }
