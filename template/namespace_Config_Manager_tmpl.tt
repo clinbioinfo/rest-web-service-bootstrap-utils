@@ -139,13 +139,6 @@ sub getUrlBase {
     return $self->{_parser}->getUrlBase(@_);
 }
 
-sub getUrlBase {
-
-    my $self = shift;
-
-    return $self->{_parser}->getUrlBase(@_);
-}
-
 sub getDatabaseAdminUsername {
 
     my $self = shift;
