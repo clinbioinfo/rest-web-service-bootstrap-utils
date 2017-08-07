@@ -16,10 +16,16 @@ use constant FALSE => 0;
 
 use constant DEFAULT_DATABASE => 'bdmprd2';
 
+use constant DEFAULT_USE_DATABASE_PROXY_ACCOUNT => FALSE;
+
 use constant DEFAULT_ORACLE_HOME => '/apps/oracle/product/client/11.2.0/';
 
 use constant DEFAULT_DATABASE_ACCOUNT_TYPE => 'publisher';
 
+## This is the application-specific configuration file
+## that is used by the established RESTful web service at
+## run time AND NOT the configuration file used by the 
+## REST-web-service-bootstrap-utils system.
 use constant DEFAULT_APP_CONFIG_INI_FILE   => 'app_config.ini';
 
 use constant DEFAULT_TEST_MODE => TRUE;
@@ -80,6 +86,15 @@ has 'database' => (
     reader   => 'getDatabase',
     required => FALSE,
     default  => DEFAULT_DATABASE
+    );
+
+has 'use_database_proxy_account' => (
+    is       => 'rw',
+    isa      => 'Str',
+    writer   => 'setUseDatabaseProxyAccount',
+    reader   => 'getUseDatabaseProxyAccount',
+    required => FALSE,
+    default  => DEFAULT_USE_DATABASE_PROXY_ACCOUNT
     );
 
 has 'oracle_home' => (
@@ -813,6 +828,7 @@ sub _generate_modules {
                 namespace             => $namespace,
                 full_namespace        => $full_namespace,
                 database              => $self->getDatabase,
+                use_database_proxy_account => $self->getUseDatabaseProxyAccount(),
                 oracle_home           => $self->getOracleHome(),
                 database_account_type => $self->getDatabaseAccountType(),        
                 app_config_ini_file   => $self->getAppConfigIniFile()
@@ -923,7 +939,8 @@ sub _generate_bin_app_psgi {
         database              => $self->getDatabase,
         oracle_home           => $self->getOracleHome(),
         database_account_type => $self->getDatabaseAccountType(),        
-        app_config_ini_file   => $self->getAppConfigIniFile()
+        app_config_ini_file   => $self->getAppConfigIniFile(),
+        use_database_proxy_account => $self->getUseDatabaseProxyAccount(),
     };
 
     $tt->process($template_file, $lookup, $outfile) || $self->{_logger}->logconfess("Encountered the following Template::process error:" . $tt->error());
