@@ -7,6 +7,7 @@ use FindBin;
 
 use lib "$FindBin::Bin/../lib";
 
+use [% namespace %]::Logger;
 use [% namespace %]::Manager;
 
 use constant TRUE => 1;
@@ -25,6 +26,14 @@ set serializer => 'JSON';
 #set session => "Simple";
 
 our $VERSION = '0.1';
+
+my $logger = new [% namespace %]::Logger(
+    logfile   => DEFAULT_LOG_FILE, 
+    log_level => DEFAULT_LOG_LEVEL);
+
+if (!defined($logger)){
+    confess "Could not instantiate [% namespace %]::Logger";
+}
 
 my $manager = [% namespace %]::Manager::getInstance(
     config_file => DEFAULT_CONFIG_FILE,
