@@ -233,7 +233,7 @@ sub _getDatabase {
 sub _getDatabaseFromConfig {
 
     my $self = shift;
-    return $self->{_config_manager}->getDatabaseAdminDatabase();
+    return $self->{_config_manager}->getDatabaseName();
 }
 
 sub _getServer {
@@ -268,7 +268,7 @@ sub _getServer {
 sub _getServerFromConfig {
 
     my $self = shift;
-    return $self->{_config_manager}->getServer();
+    return $self->{_config_manager}->getDatabaseServer();
 }
 
 

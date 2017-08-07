@@ -153,11 +153,25 @@ sub getDatabaseAdminUsername {
     return $self->{_parser}->getDatabaseAdminUsername(@_);
 }
 
-sub getDatabaseAdminPassword{
+sub getDatabaseAdminPassword {
 
     my $self = shift;
 
     return $self->{_parser}->getDatabaseAdminPassword(@_);
+}
+
+sub getDatabaseServer {
+
+    my $self = shift;
+
+    return $self->{_parser}->getDatabaseServer(@_);
+}
+
+sub getDatabaseName {
+
+    my $self = shift;
+
+    return $self->{_parser}->getDatabaseName(@_);
 }
 
 no Moose;

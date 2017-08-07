@@ -190,6 +190,20 @@ sub getDatabaseAdminPassword {
     return $self->_getValue('Database', 'admin_password');
 }
 
+sub getDatabaseServer {
+
+    my $self = shift;
+
+    return $self->_getValue('Database', 'server');
+}
+
+sub getDatabaseName {
+
+    my $self = shift;
+
+    return $self->_getValue('Database', 'database_name');
+}
+
 
 no Moose;
 __PACKAGE__->meta->make_immutable;
