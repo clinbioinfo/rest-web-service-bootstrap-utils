@@ -49,6 +49,12 @@ if (!-e $outdir){
 
 my $logfile =  "$FindBin::Bin/../output/" . File::Basename::basename($0) . '.log';
 
+my $log_dir = File::Basename::dirname($logfile);
+
+if (!-e $log_dir){
+    mkpath($log_dir) || die "Could not create directory '$log_dir' : $!";
+}
+
 if ((-e $logfile) && (-s $logfile)){
     my $bakfile = $logfile . '.bak';
     copy($logfile, $bakfile) || die "Could not backup '$logfile' to '$bakfile' : $!";
@@ -97,10 +103,6 @@ $logger->info("Going to launch the App");
 
 [% namespace %]::App->to_app;
 
-builder {
-    enable 'Deflater';
-    [% namespace %]::App->to_app;
-}
 ##-----------------------------------------------------------
 ##
 ##    END OF MAIN -- SUBROUTINES FOLLOW
