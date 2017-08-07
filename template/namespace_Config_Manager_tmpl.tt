@@ -57,21 +57,6 @@ sub getInstance {
     return $instance;
 }
 
-=item DESTROY
-
-B<Description:> [% namespace %]::Config::Manager class destructor
-
-B<Parameters:> None
-
-B<Returns:> None
-
-=cut
-
-sub DESTROY  {
-
-    my $self = shift;
-}
-
 sub getAdminEmail {
 
     my $self = shift;
