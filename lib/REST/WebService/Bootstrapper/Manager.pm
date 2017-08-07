@@ -10,6 +10,20 @@ use REST::WebService::Bootstrapper::Generator;
 use constant TRUE  => 1;
 use constant FALSE => 0;
 
+use constant DEFAULT_DATABASE => 'bdmprd2';
+
+use constant DEFAULT_USE_DATABASE_PROXY_ACCOUNT => FALSE;
+
+use constant DEFAULT_ORACLE_HOME => '/apps/oracle/product/client/11.2.0/';
+
+use constant DEFAULT_DATABASE_ACCOUNT_TYPE => 'publisher';
+
+## This is the application-specific configuration file
+## that is used by the established RESTful web service at
+## run time AND NOT the configuration file used by the 
+## REST-web-service-bootstrap-utils system.
+use constant DEFAULT_APP_CONFIG_INI_FILE   => 'app_config.ini';
+
 use constant DEFAULT_CONFIG_FILE => "$FindBin::Bin/../conf/bootstrapper.ini";
 
 use constant DEFAULT_TEST_MODE => TRUE;
@@ -110,6 +124,52 @@ has 'copyright' => (
     required => FALSE
     );
 
+has 'database' => (
+    is       => 'rw',
+    isa      => 'Str',
+    writer   => 'setDatabase',
+    reader   => 'getDatabase',
+    required => FALSE,
+    default  => DEFAULT_DATABASE
+    );
+
+has 'use_database_proxy_account' => (
+    is       => 'rw',
+    isa      => 'Str',
+    writer   => 'setUseDatabaseProxyAccount',
+    reader   => 'getUseDatabaseProxyAccount',
+    required => FALSE,
+    default  => DEFAULT_USE_DATABASE_PROXY_ACCOUNT
+    );
+
+has 'oracle_home' => (
+    is       => 'rw',
+    isa      => 'Str',
+    writer   => 'setOracleHome',
+    reader   => 'getOracleHome',
+    required => FALSE,
+    default  => DEFAULT_ORACLE_HOME
+    );
+
+has 'database_account_type' => (
+    is       => 'rw',
+    isa      => 'Str',
+    writer   => 'setDatabaseAccountType',
+    reader   => 'getDatabaseAccountType',
+    required => FALSE,
+    default  => DEFAULT_DATABASE_ACCOUNT_TYPE
+    );
+
+has 'app_config_ini_file' => (
+    is       => 'rw',
+    isa      => 'Str',
+    writer   => 'setAppConfigIniFile',
+    reader   => 'getAppConfigIniFile',
+    required => FALSE,
+    default  => DEFAULT_APP_CONFIG_INI_FILE
+    );
+
+
 sub getInstance {
 
     if (!defined($instance)){
@@ -208,8 +268,41 @@ sub run {
         $self->{_logger}->logconfess("record_list was not defined");
     }
 
+    $self->_setAdditionalParameters();
+
     $self->{_generator}->generate($record_list);
 }
+
+sub _setAdditionalParameters {
+
+    my $self = shift;
+
+    my $database = $self->getDatabase();
+    if (defined($database)){
+        $self->{_generator}->setDatabase($database);
+    }
+
+    my $use_database_proxy_account = $self->getUseDatabaseProxyAccount();
+    if (defined($use_database_proxy_account)){
+        $self->{_generator}->setUseDatabaseProxyAccount($use_database_proxy_account);
+    }
+
+    my $oracle_home = $self->getOracleHome();
+    if (defined($oracle_home)){
+        $self->{_generator}->setOracleHome($oracle_home);
+    }
+
+    my $database_account_type = $self->getDatabaseAccountType();
+    if (defined($database_account_type)){
+        $self->{_generator}->setDatabaseAccountType($database_account_type);
+    }
+
+    my $app_config_ini_file = $self->getAppConfigIniFile();
+    if (defined($app_config_ini_file)){
+        $self->{_generator}->setAppConfigIniFile($app_config_ini_file);
+    }
+}
+
 
 no Moose;
 __PACKAGE__->meta->make_immutable;
