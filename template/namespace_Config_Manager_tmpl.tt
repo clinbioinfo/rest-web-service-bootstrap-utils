@@ -2,13 +2,14 @@ package [% namespace %]::Config::Manager;
 
 use Moose;
 use Carp;
+use FindBin;
 
 use [% namespace %]::Config::File::INI::Parser;
 
 use constant TRUE => 1;
 use constant FALSE => 0;
 
-use constant DEFAULT_CONFIG_FILE => '';
+use constant DEFAULT_CONFIG_FILE => "$FindBin::Bin/../conf/[% app_config_ini_file %]";
 
 has 'config_file' => (
     is       => 'rw',

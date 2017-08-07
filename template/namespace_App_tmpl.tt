@@ -16,7 +16,7 @@ use constant DEFAULT_LOG_LEVEL => 4;
 
 use constant DEFAULT_LOG_FILE =>  "$FindBin::Bin/../output/" . File::Basename::basename($0) . '.log';
 
-use constant DEFAULT_CONFIG_FILE => "$FindBin::Bin/../conf/app.ini";
+use constant DEFAULT_CONFIG_FILE => "$FindBin::Bin/../conf/[% app_config_ini_file %]";
 
 use constant DEFAULT_ENVIRONMENT => '[% default_database %]';
 
