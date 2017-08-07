@@ -808,10 +808,14 @@ sub _generate_modules {
             }
 
             my $final_lookup = {
-                author    => $author,
-                copyright => $copyright,
-                namespace => $namespace,
-                full_namespace => $full_namespace
+                author                => $author,
+                copyright             => $copyright,
+                namespace             => $namespace,
+                full_namespace        => $full_namespace,
+                database              => $self->getDatabase,
+                oracle_home           => $self->getOracleHome(),
+                database_account_type => $self->getDatabaseAccountType(),        
+                app_config_ini_file   => $self->getAppConfigIniFile()
             };
 
 
