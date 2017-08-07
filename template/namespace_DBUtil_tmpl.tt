@@ -11,7 +11,7 @@ use constant FALSE => 0;
 
 use constant DEFAULT_PORT_NUMBER => 1521;
 
-use constant DEFAULT_USE_PROXY_ACCOUNT => __DEFAULT_USE_PROXY_ACCOUNT__;
+use constant DEFAULT_USE_PROXY_ACCOUNT => [% use_database_proxy_account %];
 
 ## Singleton support
 my $instance;
