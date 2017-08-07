@@ -18,10 +18,16 @@ use constant FALSE => 0;
 
 use constant DEFAULT_DATABASE => 'bdmprd2';
 
+use constant DEFAULT_USE_DATABASE_PROXY_ACCOUNT => FALSE;
+
 use constant DEFAULT_ORACLE_HOME => '/apps/oracle/product/client/11.2.0/';
 
 use constant DEFAULT_DATABASE_ACCOUNT_TYPE => 'publisher';
 
+## This is the application-specific configuration file
+## that is used by the established RESTful web service at
+## run time AND NOT the configuration file used by the 
+## REST-web-service-bootstrap-utils system.
 use constant DEFAULT_APP_CONFIG_INI_FILE   => 'app_config.ini';
 
 use constant DEFAULT_TEST_MODE => TRUE;
@@ -70,7 +76,8 @@ my (
     $database,
     $database_account_type,
     $oracle_home,
-    $app_config_ini_file
+    $app_config_ini_file,
+    $use_database_proxy_account
     );
 
 my $results = GetOptions (
@@ -85,7 +92,8 @@ my $results = GetOptions (
     'test_mode=s'                    => \$test_mode,
     'namespace=s'                    => \$namespace,
     'author=s'                       => \$author,
-    'copyright=s'                    => \$copyright,    
+    'copyright=s'                    => \$copyright,
+    'use_database_proxy_account=s'   => \$use_database_proxy_account, 
     );
 
 &checkCommandLineArguments();
@@ -128,8 +136,13 @@ if (defined($database_account_type)){
 if (defined($oracle_home)){
     $manager->setOracleHome($oracle_home);
 }
+
 if (defined($app_config_ini_file)){
     $manager->setAppConfigIniFile($app_config_ini_file);
+}
+
+if (defined($use_database_proxy_account)){
+    $manager->setUseDatabaseProxyAccount($use_database_proxy_account);
 }
 
 $manager->run();
@@ -158,6 +171,41 @@ sub checkCommandLineArguments {
     
     if ($help){
     	&pod2usage({-exitval => 1, -verbose => 1, -output => \*STDOUT});
+    }
+
+    if (!defined($database)){
+
+        $database = DEFAULT_DATABASE;
+
+        printYellow("--database was not specified and therefore was set to default '$database'");
+    }
+
+    if (!defined($use_database_proxy_account)){
+
+        $use_database_proxy_account = DEFAULT_USE_DATABASE_PROXY_ACCOUNT;
+
+        printYellow("--use_database_proxy_account was not specified and therefore was set to default '$use_database_proxy_account'");
+    }
+
+    if (!defined($oracle_home)){
+
+        $oracle_home = DEFAULT_ORACLE_HOME;
+
+        printYellow("--oracle_home was not specified and therefore was set to default '$oracle_home'");
+    }
+
+    if (!defined($database_account_type)){
+
+        $database_account_type = DEFAULT_DATABASE_ACCOUNT_TYPE;
+
+        printYellow("--database_account_type was not specified and therefore was set to default '$database_account_type'");
+    }
+
+    if (!defined($app_config_ini_file)){
+
+        $app_config_ini_file = DEFAULT_APP_CONFIG_INI_FILE;
+
+        printYellow("--app_config_ini_file was not specified and therefore was set to default '$app_config_ini_file'");
     }
 
     if (!defined($test_mode)){
