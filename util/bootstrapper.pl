@@ -149,11 +149,15 @@ $manager->run();
 
 printGreen(File::Spec->rel2abs($0) . " execution completed\n");
 
-print "The log file is '$logfile'\n";
+print "The log file is '$logfile'\n\n";
 
-if ($test_mode){
-    printYellow("Ran in test mode.  To disable test mode, run with: --test_mode 0");
-}
+print "Next steps:\n";
+print "===========\n\n";
+
+print "1. Make sure to adjust the settings in the application configuration file (conf/app_config.ini).\n";
+print "2. Copy assets that were just generated (bin/app.psgi, all lib/**/*.pm files and the conf/app_config.ini) to your Dancer framework directory.\n";
+print "3. Launch your Dancer application.\n\n";
+print "Take a look at the dancer_helper.pl utility program in the dev-utils code-base.\n\n";
 
 exit(0);
 
