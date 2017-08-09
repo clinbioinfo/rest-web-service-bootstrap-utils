@@ -462,7 +462,7 @@ sub _get_app_method_content {
         url => $url,
         desc => $desc,
         method_name => $method_name,
-        route_parameters_list_content => $route_parameters_list_content,
+        routes_parameters_list_content => $route_parameters_list_content,
         body_parameters_list_content => $body_parameters_list_content,
         argument_list_content => $argument_list_content
     };
