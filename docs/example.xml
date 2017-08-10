@@ -46,8 +46,8 @@
 			<sql><![CDATA[
 				select * 
 				from cheeses 
-				where id = :id
-				and username = :username
+				where id = ':id'
+				and username = ':username'
 				]]>					
 			</sql>
 		</end-point>
