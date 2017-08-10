@@ -404,23 +404,49 @@ sub _generate_methods {
 
         $method_name =~ s|\-|_|g;
 
-        my $sql = $record->getSQL();
-        if (!defined($sql)){
-            $self->{_logger}->logconfess("sql was not defined for Record : " . Dumper $sql);
-        }
+        my $method = lc($record->getMethod());
 
+        my $sql = $record->getSQL();
+
+        if ((!defined($sql)) || ($sql eq '')){
+
+            if ($method ne 'post'){
+        
+                $self->{_logger}->logconfess("for method_name '$method_name' sql was not defined for Record : " . Dumper $sql);
+            }
+        }
 
         my $route_parameters_list = $record->getRouteParametersList();
 
         my $body_parameters_list = $record->getBodyParametersList();
 
-        $self->_get_app_method_content($method_name, $url, $desc, $route_parameters_list, $body_parameters_list);
+        my $table_list = $record->getTableList();
+
+        $self->_get_app_method_content($method_name, $url, $desc, $route_parameters_list, $body_parameters_list, $method);
 
         $self->_get_manager_method_content($method_name, $url, $desc, $type);
 
         $self->_set_dbutil_type($type);
 
         $self->_get_dbutil_method_content($method_name, $url, $sql, $desc, $type, $route_parameters_list, $body_parameters_list);
+
+
+        my $unique_table_lookup = {};
+
+        foreach my $table (@{$table_list}){
+
+            if (exists $unique_table_lookup->{$table}){
+                next;
+            }
+
+            my $method_name = 'insert' . ucfirst(lc($table)) . 'Record';
+            
+            if (!defined($sql)){
+                $sql = "insert into $table values ();"
+            }
+
+            $self->_get_dbutil_method_content($method_name, $url, $sql, $desc, $type, $route_parameters_list, $body_parameters_list);
+        }
     }
 }
 
@@ -445,7 +471,7 @@ sub _set_dbutil_type {
 sub _get_app_method_content {
 
     my $self = shift;
-    my ($method_name, $url, $desc, $route_parameters_list, $body_parameters_list) = @_;
+    my ($method_name, $url, $desc, $route_parameters_list, $body_parameters_list, $method) = @_;
     
     my $template_file = $self->getAppMethodTemplateFile();
     if (!defined($template_file)){
@@ -461,6 +487,7 @@ sub _get_app_method_content {
     my $lookup = {
         url => $url,
         desc => $desc,
+        method => $method,  ## e.g.: get or post
         method_name => $method_name,
         routes_parameters_list_content => $route_parameters_list_content,
         body_parameters_list_content => $body_parameters_list_content,
@@ -586,7 +613,7 @@ sub _get_manager_method_content {
 sub _get_dbutil_method_content {
 
     my $self = shift;
-    my ($method_name, $url, $sql, $desc, $type) = @_;
+    my ($method_name, $url, $sql, $desc, $type, $route_parameters_list, $body_parameters_list) = @_;
     
     my $template_file;
 

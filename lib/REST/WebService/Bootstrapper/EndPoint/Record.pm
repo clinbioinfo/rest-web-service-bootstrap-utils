@@ -70,6 +70,15 @@ has 'body_parameters_list' => (
     required => FALSE
     );
 
+has 'table_list' => (
+    is       => 'rw',
+    isa      => 'ArrayRef',
+    writer   => 'setTableList',
+    reader   => 'getTableList',
+    required => FALSE
+    );
+
+
 sub BUILD {
 
     my $self = shift;

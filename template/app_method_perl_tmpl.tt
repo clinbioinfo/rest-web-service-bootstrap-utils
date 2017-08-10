@@ -1,4 +1,4 @@
-get '[% url %]' => sub {
+[% method %] '[% url %]' => sub {
 
 	[% routes_parameters_list_content %]
 

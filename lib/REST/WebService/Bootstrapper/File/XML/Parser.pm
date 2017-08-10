@@ -121,21 +121,24 @@ sub getRecordList {
 sub _create_endpoint_record {
 
     my $self = shift;
-    my ($name, $url, $desc, $method, $type, $sql, $route_parameters_list, $body_parameters_list) = @_;
+    my ($name, $url, $desc, $method, $type, $sql, $route_parameters_list, $body_parameters_list, $table_list) = @_;
 
     my $record = new REST::WebService::Bootstrapper::EndPoint::Record(
         name   => $name,
         url    => $url,
         desc   => $desc,
         method => $method,
-        type   => $type,
-        sql    => $sql,
+        type   => $type
         );
 
     if (!defined($record)){
         $self->{_logger}->logconfess("Could not instantiate REST::WebService::Bootstrapper::EndPoint::Record");
     }
 
+    if (defined($sql)){
+        $record->setSQL($sql);
+    }
+    
     if (defined($route_parameters_list)){
         $record->setRouteParametersList($route_parameters_list)
     }
@@ -144,6 +147,10 @@ sub _create_endpoint_record {
         $record->setBodyParametersList($body_parameters_list);
     }
 
+    if (defined($table_list)){
+        $record->setTableList($table_list);
+    }
+    
     push(@{$self->{_endpoint_record_list}}, $record);
 }
 

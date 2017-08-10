@@ -175,7 +175,42 @@ sub _end_point_callback {
         $self->{_logger}->info("end-point with name '$name' does not have any body-parameters-list element");
     }
 
-    $self->_create_endpoint_record($name, $url, $desc, $method, $type, $sql, $route_parameters_list, $body_parameters_list);
+  my $table_list = [];
+
+    if (lc($method) eq 'post'){
+
+        if ($end_point->has_child('target-tables')){
+ 
+            my $target_tables_elem = $end_point->first_child('target-tables');
+
+            if ($target_tables_elem->has_child('table')){
+            
+                my $table_elem = $target_tables_elem->first_child('table');
+                
+                my $table_name = $table_elem->text();
+
+                if ((defined($table_name)) && ($table_name ne '')){
+                    
+                    push(@{$table_list}, $table_name);
+                }
+
+                while ($table_elem = $table_elem->next_sibling()){
+
+                    my $table_name = $table_elem->text();
+                    
+                    if ((defined($table_name)) && ($table_name ne '')){
+                    
+                        push(@{$table_list}, $table_name);
+                    }
+                }
+            }
+        }
+        else {
+            $self->{_logger}->warn("target-tables was not defined for end-point " . Dumper $end_point);            
+        }
+    }
+
+    $self->_create_endpoint_record($name, $url, $desc, $method, $type, $sql, $route_parameters_list, $body_parameters_list, $table_list);
 }
 
 sub _get_route_parameters_list {

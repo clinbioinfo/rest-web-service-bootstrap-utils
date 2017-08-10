@@ -1,0 +1,71 @@
+<bootstrapper>
+	<end-point-list>
+		<end-point>
+			<name>Add tomatoes to recipe</name>
+			<url>/add_tomatoes/recipe/:recipe_id</url>
+			<method>POST</method>
+			<desc>Add tomatoes to a recipe.</desc>
+			<type>Oracle</type>
+			<body-parameters-list>
+				<body-param>count</body-param>
+				<body-param>type</body-param>
+			</body-parameters-list>
+			<target-tables>
+				<table>receipe</table>
+				<table>menu</table>
+				<table>tomatoes</table>
+			</target-tables>
+		</end-point>
+		<end-point>
+			<name>Add mushrooms to recipe</name>
+			<url>/add_mushrooms/recipe/:recipe_id</url>
+			<method>POST</method>
+			<desc>Add mushrooms to a recipe.</desc>
+			<type>Oracle</type>
+			<body-parameters-list>
+				<body-param>count</body-param>
+				<body-param>type</body-param>
+			</body-parameters-list>
+			<target-tables>
+				<table>receipe</table>
+				<table>menu</table>
+				<table>mushrooms</table>
+			</target-tables>
+		</end-point>
+		<end-point>
+			<name>Get toppings details by identifier</name>
+			<url>/toppings_details/:id</url>
+			<method>GET</method>
+			<desc>Retrieve toppings details by identifier.</desc>
+			<type>Oracle</type>
+			<body-parameters-list>
+				<body-param>username</body-param>
+				<body-param>password</body-param>
+			</body-parameters-list>
+			<sql><![CDATA[
+				select * 
+				from toppings 
+				where id = :id
+				]]>					
+			</sql>
+		</end-point>
+		<end-point>
+			<name>Get cheeses by identifier</name>
+			<url>/cheese_details/:id</url>
+			<method>GET</method>
+			<desc>Retrieve common demographic data for given BDM study code, e.g., bdm_study_code = CP1013.</desc>
+			<type>Oracle</type>
+			<body-parameters-list>
+				<body-param>username</body-param>
+				<body-param>password</body-param>
+			</body-parameters-list>
+			<sql><![CDATA[
+				select * 
+				from cheeses 
+				where id = ':id'
+				and username = ':username'
+				]]>					
+			</sql>
+		</end-point>
+	</end-point-list>
+</bootstrapper>
