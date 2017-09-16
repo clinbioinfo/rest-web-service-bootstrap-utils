@@ -1,0 +1,70 @@
+<bootstrapper>
+	<end-point-list>
+		<end-point>
+			<name>Add tomatoes to recipe</name>
+			<url>/add_tomatoes/recipe/:recipe_id</url>
+			<method>POST</method>
+			<desc>Add tomatoes to a recipe.</desc>
+			<type>MongoDB</type>
+			<body-parameters-list>
+				<body-param>count</body-param>
+				<body-param>type</body-param>
+			</body-parameters-list>
+			<target-collections>
+				<collection>recipe</collection>
+				<collection>ops</collection>
+			</target-collections>
+		</end-point>
+		<end-point>
+			<name>Add mushrooms to recipe</name>
+			<url>/add_mushrooms/recipe/:recipe_id</url>
+			<method>POST</method>
+			<desc>Add mushrooms to a recipe.</desc>
+			<type>MongoDB</type>
+			<body-parameters-list>
+				<body-param>count</body-param>
+				<body-param>type</body-param>
+			</body-parameters-list>
+			<target-collections>
+				<collection>receipe</collection>
+				<collection>ops</collection>
+			</target-collections>
+		</end-point>
+		<end-point>
+			<name>Get toppings details by identifier</name>
+			<label>Topping ID</label>
+			<label-desc>The Topping identifier is the primary identifier used to identify toppings in this system.</label-desc>
+			<url>/toppings_details/:id</url>
+			<method>GET</method>
+			<desc>Retrieve toppings details by identifier.</desc>
+			<type>MongoDB</type>
+			<expiry>0</expiry>
+			<body-parameters-list>
+				<body-param>username</body-param>
+				<body-param>password</body-param>
+			</body-parameters-list>
+			<sql><![CDATA[
+				db.toppings.find({'id' : :id, 'username' : :username})
+				]]>					
+			</sql>
+		</end-point>
+		<end-point>
+			<name>Get cheeses by identifier</name>
+			<label>Cheese ID</label>
+			<label-desc>The cheese identifier is the primary identifier used to identify cheeses in this system.</label-desc>
+			<expiry>3600</expiry>
+			<url>/cheese_details/:id</url>
+			<method>GET</method>
+			<desc>Retrieve common demographic data for given BDM study code, e.g., bdm_study_code = CP1013.</desc>
+			<type>MongoDB</type>
+			<body-parameters-list>
+				<body-param>username</body-param>
+				<body-param>password</body-param>
+			</body-parameters-list>
+			<sql><![CDATA[
+				db.toppings.find({'id' : :id, 'username' : :username}, {'id' : 1, 'details' : 1, '_id' : 0})
+				]]>					
+			</sql>
+		</end-point>
+	</end-point-list>
+</bootstrapper>

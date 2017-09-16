@@ -1,12 +1,32 @@
 sub [% method_name %]{
 
 	my $self = shift;
+	[% argument_list_content %]
 
 	## [% desc %]
 
-	my $sql = qq|
-	    [% sql %]
-	|;	
+	my $client = MongoDB->connect();
+	if (!defined($client)){
+		$self->{_logger}->logconfess("Could not instantiate MongoDB client");
+	}
 
-    return $self->_get_array_ref($sql);
+	my $db = $client->get_database("[% database_name %]");
+	if (!defined($db)){
+		$self->{_logger}->logconfess("Could not get database '[% database_name %]'");
+	}
+
+	my $collection = $db->get_collection("[% collection_name %]");
+	if (!defined($collection)){
+		$self->{_logger}->logconfess("Could not collection '[% collection_name %]'");
+	}
+
+	[%#
+	 	Examples of the mongo_operation translations include:
+	 	$collection->find({"_id" : "some_id"})
+	 	$collection->find_one({"_id" : "some_id"})
+	 	$collection->insert_one({"type" : "all dressed", "size" : "large"})
+	%]
+
+	return $collection->[% mongodb_operation %]([% query_and_projection %]);
+
 }

@@ -160,7 +160,11 @@ sub _end_point_callback {
 
     my $sql;
 
-    if ((lc($type) eq 'oracle') || (lc($type) eq 'mysql') || (lc($type) eq 'postgreql') || (lc($type) eq 'sqlite')) {
+    if ((lc($type) eq 'oracle')    || 
+        (lc($type) eq 'mysql')     || 
+        (lc($type) eq 'postgreql') || 
+        (lc($type) eq 'sqlite')    ||
+        (lc($type) eq 'mongodb')){
 
         if (! $end_point->has_child('sql')){
             $self->{_logger}->warn("end-point with type '$type' does not have child sql " . Dumper $end_point);
@@ -207,43 +211,67 @@ sub _end_point_callback {
         $self->{_logger}->info("end-point with name '$name' does not have any body-parameters-list element");
     }
 
-  my $table_list = [];
+    my $table_list = [];
 
     if (lc($method) eq 'post'){
 
         if ($end_point->has_child('target-tables')){
- 
-            my $target_tables_elem = $end_point->first_child('target-tables');
 
-            if ($target_tables_elem->has_child('table')){
-            
-                my $table_elem = $target_tables_elem->first_child('table');
-                
-                my $table_name = $table_elem->text();
-
-                if ((defined($table_name)) && ($table_name ne '')){
-                    
-                    push(@{$table_list}, $table_name);
-                }
-
-                while ($table_elem = $table_elem->next_sibling()){
-
-                    my $table_name = $table_elem->text();
-                    
-                    if ((defined($table_name)) && ($table_name ne '')){
-                    
-                        push(@{$table_list}, $table_name);
-                    }
-                }
-            }
+            $self->_process_target_collections($end_point, $table_list, 'target-tables', 'table');
         }
         else {
             $self->{_logger}->warn("target-tables was not defined for end-point " . Dumper $end_point);            
         }
+
+        ##
+        ## Will treat the collections as if they are tables for processing purposes.
+        ##
+
+        if ($end_point->has_child('target-collections')){
+
+            $self->_process_target_collections($end_point, $table_list, 'target-collections', 'collection');
+        }
+        else {
+            $self->{_logger}->warn("target-collections was not defined for end-point " . Dumper $end_point);
+        }
     }
+
 
     $self->_create_endpoint_record($name, $url, $desc, $method, $type, $sql, $route_parameters_list, $body_parameters_list, $table_list, $label, $label_desc, $expiry);
 }
+
+
+ 
+sub _process_target_collections {
+
+    my $self = shift;
+    my ($end_point, $table_list, $targets, $target_type) = @_;
+
+    my $target_tables_elem = $end_point->first_child($targets);
+
+    if ($target_tables_elem->has_child($target_type)){
+    
+        my $table_elem = $target_tables_elem->first_child($target_type);
+        
+        my $table_name = $table_elem->text();
+
+        if ((defined($table_name)) && ($table_name ne '')){
+            
+            push(@{$table_list}, $table_name);
+        }
+
+        while ($table_elem = $table_elem->next_sibling()){
+
+            my $table_name = $table_elem->text();
+            
+            if ((defined($table_name)) && ($table_name ne '')){
+            
+                push(@{$table_list}, $table_name);
+            }
+        }
+    }
+}
+
 
 sub _get_route_parameters_list {
 

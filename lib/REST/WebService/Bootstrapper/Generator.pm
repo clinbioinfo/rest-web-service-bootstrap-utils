@@ -373,6 +373,8 @@ sub _generate_methods {
 
     $self->{_manager_method_content_list} = [];
 
+    $self->{_unique_table_lookup} = {};
+
     my $default_description = DEFAULT_DESCRIPTION;
 
     foreach my $record (@{$record_list}){
@@ -430,25 +432,54 @@ sub _generate_methods {
 
         $self->_get_dbutil_method_content($method_name, $url, $sql, $desc, $type, $route_parameters_list, $body_parameters_list);
 
+        $self->_generate_insert_table_methods($method_name, $url, $sql, $desc, $type, $route_parameters_list, $body_parameters_list, $table_list);
+    }
+}
 
-        my $unique_table_lookup = {};
+sub _generate_insert_table_methods {
 
-        foreach my $table (@{$table_list}){
+    my $self = shift;
+    my ($method_name, $url, $sql, $desc, $type, $route_parameters_list, $body_parameters_list, $table_list) = @_;
 
-            if (exists $unique_table_lookup->{$table}){
-                next;
-            }
+    my $table_ctr = 0;
+    
+    my $method_ctr = 0;
 
-            my $method_name = 'insert' . ucfirst(lc($table)) . 'Record';
+    foreach my $table (@{$table_list}){
+
+        $table_ctr++;
+
+        if (exists $self->{_unique_table_lookup}->{$table}){
+            next;
+        }
+
+        my $method_name = 'insert' . ucfirst(lc($table)) . 'Record';
+
+        if (lc($type) ne 'mongodb'){
+
+            ## We're only creating these insert methods for situations where the persistence
+            ## layer is NOT MongoDB.
+            ## The motivation for this is that in relational databases, we typically decompose
+            ## the data and store it in different tables.
+            ## On the other hand, usually in MongoDB, all of the data will be inserted into a
+            ## single document in a single collection.
             
             if (!defined($sql)){
                 $sql = "insert into $table values ();"
             }
 
             $self->_get_dbutil_method_content($method_name, $url, $sql, $desc, $type, $route_parameters_list, $body_parameters_list);
+
+            $method_ctr++;
+        }
+        else {
+            $self->{_logger}->info("Will not create method '$method_name' because database type is '$type'");
         }
     }
+
+    $self->{_logger}->info("Processed '$table_ctr' tables and attempted to generate '$method_ctr' insert methods");
 }
+
 
 sub _set_dbutil_type {
 
@@ -645,15 +676,35 @@ sub _get_dbutil_method_content {
 
     my $argument_list_content = $self->_get_dbutil_argument_list_content();
 
-    my $adjusted_sql_content = $self->_get_adjusted_sql_content($sql);
-
     my $lookup = {
-        url  => $url,
-        desc => $desc,
-        sql  => $adjusted_sql_content,
-        method_name => $method_name,
+        url                   => $url,
+        desc                  => $desc,
+        method_name           => $method_name,
         argument_list_content => $argument_list_content
     };
+
+    if (defined($sql)){
+        
+        if (lc($type) eq 'mongodb'){
+
+            my ($content, $collection_name, $mongodb_operation, $query_and_projection) = $self->_get_adjusted_mongodb_function_content($sql);
+
+            $lookup->{'collection_name'} = $collection_name;
+
+            $lookup->{'mongodb_operation'} = $mongodb_operation;
+            
+            $lookup->{'query_and_projection'} = $query_and_projection;
+
+        }
+        else {
+
+            $lookup->{'sql'} = $self->_get_adjusted_sql_content($sql);
+        }
+    }
+    else {
+        $self->{_logger}->warn("sql was not defined for url '$url' method_name '$method_name' desc '$desc'");
+    }
+
 
     my $content = $self->_generate_content_from_template($template_file, $lookup);
 
@@ -677,12 +728,9 @@ sub _get_dbutil_method_content {
     }
 }
 
-sub _get_adjusted_sql_content {
+sub _get_param_lookup {
 
     my $self = shift;
-    my ($sql) = @_;
-
-    my $content_list = [];
 
     my $lookup = {};
 
@@ -691,6 +739,7 @@ sub _get_adjusted_sql_content {
         if (scalar(@{$self->{_clean_current_argument_list}}) > 0){
 
             foreach my $param (@{$self->{_clean_current_argument_list}}){
+    
                 $lookup->{$param}++;
             }
         }
@@ -702,7 +751,96 @@ sub _get_adjusted_sql_content {
         $self->{_logger}->logconfess("_clean_current_argument_list does not exist");
     }
 
-    $self->{_logger}->info(Dumper $lookup);
+    return $lookup;
+}
+
+
+sub _get_adjusted_mongodb_function_content {
+
+    my $self = shift;
+    my ($sql) = @_;
+
+    my $content_list = [];
+
+    my $lookup = $self->_get_param_lookup();
+
+    my @lines =  split("\n", $sql);
+    
+    my @adjusted_lines;
+
+    my $collection_name;
+    my $mongodb_operation;
+    my $query_and_projection;
+
+    foreach my $line (@lines){
+
+        if ($line =~ m|db\.(\S+)\.(\S+)\((.+)\)|){
+
+            $collection_name = $1;
+            $mongodb_operation = $2;
+            $query_and_projection = $3;
+        }
+
+        # if ($query_and_projection=~ m|\:(\S+)|){
+        
+        #     while ($query_and_projection =~ s|\:(\S+)|$lookup->{$1}|g){}
+        # }
+
+
+        push(@adjusted_lines, $line);
+    }
+
+    my $content = join("\n", @adjusted_lines);
+
+
+    if (!defined($collection_name)){
+        $self->{_logger}->logconfess("collection_name was not defined for content '$sql'");
+    }
+
+    if (!defined($mongodb_operation)){
+        $self->{_logger}->logconfess("mongodb_operation was not defined for content '$sql'");
+    }
+    else {
+
+        if ($mongodb_operation eq 'findOne'){
+            $mongodb_operation = 'find_one';
+        }
+        elsif ($mongodb_operation eq 'find'){
+            $mongodb_operation = 'find';
+        }
+        elsif ($mongodb_operation eq 'insertOne'){
+            $mongodb_operation = 'insert_one';
+        }
+        elsif ($mongodb_operation eq 'insert'){
+            $mongodb_operation = 'insert_one';
+        }
+        elsif ($mongodb_operation eq 'updateOne'){
+            $mongodb_operation = 'update_one';
+        }
+        elsif ($mongodb_operation eq 'update'){
+            $mongodb_operation = 'update_one';
+        }
+        else{
+            $self->{_logger}->logconfess("unexpected mongodb operation '$mongodb_operation'");
+        }
+    }
+
+    if (!defined($query_and_projection)){
+        $self->{_logger}->logconfess("query_and_projection was not defined for content '$sql'");
+    }
+
+    return ($content, $collection_name, $mongodb_operation, $query_and_projection);
+}
+
+
+sub _get_adjusted_sql_content {
+
+    my $self = shift;
+    my ($sql) = @_;
+
+    my $content_list = [];
+
+    my $lookup = $self->_get_param_lookup();
 
     my @lines =  split("\n", $sql);
     
