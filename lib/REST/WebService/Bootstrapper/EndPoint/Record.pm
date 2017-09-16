@@ -78,6 +78,29 @@ has 'table_list' => (
     required => FALSE
     );
 
+has 'label' => (
+    is       => 'rw',
+    isa      => 'Str',
+    writer   => 'setLabel',
+    reader   => 'getLabel',
+    required => FALSE
+    );
+
+has 'label_desc' => (
+    is       => 'rw',
+    isa      => 'Str',
+    writer   => 'setLabelDesc',
+    reader   => 'getLabelDesc',
+    required => FALSE
+    );
+
+has 'expiry' => (
+    is       => 'rw',
+    isa      => 'Str',
+    writer   => 'setExpiry',
+    reader   => 'getExpiry',
+    required => FALSE
+    );
 
 sub BUILD {
 

@@ -34,10 +34,13 @@
 		</end-point>
 		<end-point>
 			<name>Get toppings details by identifier</name>
+			<label>Topping ID</label>
+			<label-desc>The Topping identifier is the primary identifier used to identify toppings in this system.</label-desc>
 			<url>/toppings_details/:id</url>
 			<method>GET</method>
 			<desc>Retrieve toppings details by identifier.</desc>
 			<type>Oracle</type>
+			<expiry>0</expiry>
 			<body-parameters-list>
 				<body-param>username</body-param>
 				<body-param>password</body-param>
@@ -51,6 +54,9 @@
 		</end-point>
 		<end-point>
 			<name>Get cheeses by identifier</name>
+			<label>Cheese ID</label>
+			<label-desc>The cheese identifier is the primary identifier used to identify cheeses in this system.</label-desc>
+			<expiry>3600</expiry>
 			<url>/cheese_details/:id</url>
 			<method>GET</method>
 			<desc>Retrieve common demographic data for given BDM study code, e.g., bdm_study_code = CP1013.</desc>

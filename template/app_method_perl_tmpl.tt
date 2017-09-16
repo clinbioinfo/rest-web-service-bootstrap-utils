@@ -4,5 +4,20 @@
 
 	[% body_parameters_list_content %]
 
-    return $manager->[% method_name %]([% argument_list_content %]);
+    my $ref = $manager->[% method_name %]([% argument_list_content %]);
+
+    if (!defined($ref)){
+    	$self->{_logger}->logconfess("ref was not defined");
+    }
+
+
+    my $payload = {
+    	'expiry'     => [% expiry %],
+    	'label'      => "[% label %]",
+    	'label-desc' => "[% label_desc %]",
+    	'data'       => $ref
+    };
+
+    return $payload;
+
 };

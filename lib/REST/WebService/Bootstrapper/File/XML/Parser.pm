@@ -121,7 +121,7 @@ sub getRecordList {
 sub _create_endpoint_record {
 
     my $self = shift;
-    my ($name, $url, $desc, $method, $type, $sql, $route_parameters_list, $body_parameters_list, $table_list) = @_;
+    my ($name, $url, $desc, $method, $type, $sql, $route_parameters_list, $body_parameters_list, $table_list, $label, $label_desc, $expiry) = @_;
 
     my $record = new REST::WebService::Bootstrapper::EndPoint::Record(
         name   => $name,
@@ -149,6 +149,18 @@ sub _create_endpoint_record {
 
     if (defined($table_list)){
         $record->setTableList($table_list);
+    }
+
+    if (defined($label)){
+        $record->setLabel($label);
+    }
+
+    if (defined($label_desc)){
+        $record->setLabelDesc($label_desc);
+    }
+
+    if (defined($expiry)){
+        $record->setExpiry($expiry);
     }
     
     push(@{$self->{_endpoint_record_list}}, $record);

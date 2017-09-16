@@ -422,7 +422,7 @@ sub _generate_methods {
 
         my $table_list = $record->getTableList();
 
-        $self->_get_app_method_content($method_name, $url, $desc, $route_parameters_list, $body_parameters_list, $method);
+        $self->_get_app_method_content($method_name, $url, $desc, $route_parameters_list, $body_parameters_list, $method, $record->getLabel(), $record->getLabelDesc(), $record->getExpiry());
 
         $self->_get_manager_method_content($method_name, $url, $desc, $type);
 
@@ -471,7 +471,7 @@ sub _set_dbutil_type {
 sub _get_app_method_content {
 
     my $self = shift;
-    my ($method_name, $url, $desc, $route_parameters_list, $body_parameters_list, $method) = @_;
+    my ($method_name, $url, $desc, $route_parameters_list, $body_parameters_list, $method, $label, $label_desc, $expiry) = @_;
     
     my $template_file = $self->getAppMethodTemplateFile();
     if (!defined($template_file)){
@@ -491,7 +491,10 @@ sub _get_app_method_content {
         method_name => $method_name,
         routes_parameters_list_content => $route_parameters_list_content,
         body_parameters_list_content => $body_parameters_list_content,
-        argument_list_content => $argument_list_content
+        argument_list_content => $argument_list_content,
+        label      => $label,
+        label_desc => $label_desc,
+        expiry     => $expiry
     };
 
     my $content = $self->_generate_content_from_template($template_file, $lookup);

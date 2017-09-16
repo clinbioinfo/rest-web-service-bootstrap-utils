@@ -9,6 +9,8 @@ extends 'REST::WebService::Bootstrapper::File::XML::Parser';
 use constant TRUE  => 1;
 use constant FALSE => 0;
 
+use constant DEFAULT_EXPIRY => 0;
+
 use constant DEFAULT_METHOD => 'GET';
 
 use constant DEFAULT_TEST_MODE => TRUE;
@@ -105,6 +107,36 @@ sub _end_point_callback {
     else {
         $desc = $end_point->first_child('desc')->text();
     }
+
+
+    my $label = 'N/A';
+
+    if (! $end_point->has_child('label')){
+        $self->{_logger}->warn("end-point does not have child label " . Dumper $end_point);
+    }
+    else {
+        $label = $end_point->first_child('label')->text();
+    }
+
+    my $label_desc = 'N/A';
+
+    if (! $end_point->has_child('label-desc')){
+        $self->{_logger}->warn("end-point does not have child label-desc " . Dumper $end_point);
+    }
+    else {
+        $label_desc = $end_point->first_child('label-desc')->text();
+    }
+
+    my $expiry = DEFAULT_EXPIRY;
+
+    if (! $end_point->has_child('expiry')){
+        $self->{_logger}->warn("end-point does not have child expiry " . Dumper $end_point);
+    }
+    else {
+        $expiry = $end_point->first_child('expiry')->text();
+    }
+
+
 
     my $method;
 
@@ -210,7 +242,7 @@ sub _end_point_callback {
         }
     }
 
-    $self->_create_endpoint_record($name, $url, $desc, $method, $type, $sql, $route_parameters_list, $body_parameters_list, $table_list);
+    $self->_create_endpoint_record($name, $url, $desc, $method, $type, $sql, $route_parameters_list, $body_parameters_list, $table_list, $label, $label_desc, $expiry);
 }
 
 sub _get_route_parameters_list {
